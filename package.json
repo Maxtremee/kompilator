@@ -3,17 +3,30 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "start": "bun index.ts",
-    "dev": "bun --watch index.ts"
+    "start": "bun src/index.ts",
+    "dev": "bun --watch src/index.ts",
+    "build": "bun build src/index.ts --outdir ./dist",
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "lint": "bunx @biomejs/biome check **/*.ts",
+    "lint:fix": "bunx @biomejs/biome check --apply **/*.ts",
+    "clean": "bun pm cache rm && bunx rimraf bun.lockb node_modules && bun install"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/fluent-ffmpeg": "^2.1.26"
+    "@types/fluent-ffmpeg": "^2.1.26",
+    "prisma": "^5.19.1",
+    "@biomejs/biome": "^1.8.3",
+    "@total-typescript/ts-reset": "^0.6.1"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@elysiajs/static": "^1.1.1",
+    "discord.js": "^14.16.1",
+    "elysia": "^1.1.12",
     "fluent-ffmpeg": "^2.1.3"
   }
 }

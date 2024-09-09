@@ -1,8 +1,8 @@
 import { readdir, open } from 'node:fs/promises';
-import { join } from 'node:path';
+import path from 'node:path';
 import ffmpeg from 'fluent-ffmpeg';
 
-const DIRECTORY = 'test-videos' as const;
+const DIRECTORY = 'playlists' as const;
 const AUDIO_BITRATE = 128 as const;
 // 25MiB to kBit
 const TARGET_SIZE = 25 * 8388.608
@@ -10,7 +10,7 @@ const OUTPUT_FILE_FORMAT = 'mp4' as const
 
 async function getFiles(directoryPath: string) {
   const fileNames = await readdir(directoryPath);
-  return fileNames.map(file => join(directoryPath, file));
+  return fileNames.map(file => path.join(directoryPath, file));
 }
 
 async function getVideoMetadata(path: string): Promise<ffmpeg.FfprobeData> {
@@ -86,9 +86,9 @@ async function compress(inputName: string, outputName: string, targetBitrate: nu
   console.log('Compression finished')
 }
 
-async function run() {
+export async function render(playlist: string) {
   try {
-    const videos = await getFiles(DIRECTORY)
+    const videos = await getFiles(path.join(DIRECTORY, playlist))
 
     await merge(videos, 'output')
 
@@ -101,5 +101,3 @@ async function run() {
     console.error(e)
   }
 }
-
-run()
