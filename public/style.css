@@ -1,3 +1,17 @@
+:root {
+  --dc-color-50: #f1f5fc;
+  --dc-color-100: #e5eefa;
+  --dc-color-200: #cfdff6;
+  --dc-color-300: #b2c9ef;
+  --dc-color-400: #93ace6;
+  --dc-color-500: #7289da;
+  --dc-color-600: #5e6ecd;
+  --dc-color-700: #4e5ab4;
+  --dc-color-800: #414c92;
+  --dc-color-900: #3a4375;
+  --dc-color-950: #222744;
+}
+
 *,
 *::before,
 *::after {
@@ -13,8 +27,8 @@ body {
   -webkit-font-smoothing: antialiased;
 
   height: 100vh;
-  color: #e5eefa;
-  background: linear-gradient(41deg, rgba(2,0,36,1) 0%, rgba(114,137,218,1) 86%, rgba(0,212,255,1) 100%);
+  color: var(--dc-color-100);
+  background: linear-gradient(41deg, rgba(2, 0, 36, 1) 0%, rgba(114, 137, 218, 1) 86%, rgba(0, 212, 255, 1) 100%);
 }
 
 img,
@@ -52,6 +66,12 @@ h6 {
   font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
+@keyframes blur {
+  0% {
+    filter: blur(20px);
+  }
+}
+
 main {
   height: 100%;
   display: flex;
@@ -60,13 +80,15 @@ main {
   justify-content: center;
   gap: 1rem;
   text-align: center;
+
+  animation: blur 450ms cubic-bezier(.17,.67,.83,.67);
 }
 
 input {
   all: unset;
-  border-radius: 10px;
+  border-radius: 1rem;
   padding: 0.5rem 1rem;
-  background-color: #222744;
+  background-color: var(--dc-color-950);
 }
 
 button {
@@ -74,13 +96,13 @@ button {
   transition: all 300ms;
   padding: 0.5rem 1rem;
   color: white;
-  border-radius: 10px;
-  background-color: #7289da;
+  border-radius: 1rem;
+  background-color: var(--dc-color-500);
   cursor: pointer;
 }
 
 button:hover {
-  background-color: #93ace6;
+  background-color: var(--dc-color-400);
 }
 
 .form {
