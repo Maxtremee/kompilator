@@ -3,8 +3,8 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "start": "bun src/index.ts",
-    "dev": "bun --watch src/index.ts",
+    "start": "bun src/discord/deploy.ts && bun src/index.ts",
+    "dev": "bun src/discord/deploy.ts && bun --watch src/index.ts",
     "build": "bun build src/index.ts --outdir ./dist",
     "typecheck": "tsc --project tsconfig.json --noEmit",
     "db:push": "prisma db push",
