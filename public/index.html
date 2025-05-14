@@ -1,27 +1,143 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Kompilator | Discord bot</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" type="text/css" media="screen" href="style.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <main>
-      <h1>Kompilator | Discord bot</h1>
-      <h2>Create playlists and make them into Your own video compilations!</h2>
-      <form class="form" method="POST" action="/connect">
-        <label for="password">Password</label>
-        <input type="password" name="password" required="true" />
-        <button type="submit">Connect</button>
-      </form>
-    </main>
-  </body>
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Kompilator | Discord bot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --dc-color-50: #f1f5fc;
+      --dc-color-100: #e5eefa;
+      --dc-color-200: #cfdff6;
+      --dc-color-300: #b2c9ef;
+      --dc-color-400: #93ace6;
+      --dc-color-500: #7289da;
+      --dc-color-600: #5e6ecd;
+      --dc-color-700: #4e5ab4;
+      --dc-color-800: #414c92;
+      --dc-color-900: #3a4375;
+      --dc-color-950: #222744;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    * {
+      margin: 0;
+    }
+
+    body {
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+
+      height: 100vh;
+      color: var(--dc-color-100);
+      background: linear-gradient(41deg, rgba(2, 0, 36, 1) 0%, rgba(114, 137, 218, 1) 86%, rgba(0, 212, 255, 1) 100%);
+    }
+
+    img,
+    picture,
+    video,
+    canvas,
+    svg {
+      display: block;
+      max-width: 100%;
+    }
+
+    input,
+    button,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      overflow-wrap: break-word;
+    }
+
+    #root,
+    #__next {
+      isolation: isolate;
+    }
+
+    * {
+      font-family: "Noto Sans", system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    }
+
+    @keyframes blur {
+      0% {
+        filter: blur(20px);
+      }
+    }
+
+    main {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      text-align: center;
+
+      animation: blur 450ms cubic-bezier(.17, .67, .83, .67);
+    }
+
+    input {
+      all: unset;
+      border-radius: 1rem;
+      padding: 0.5rem 1rem;
+      background-color: var(--dc-color-950);
+    }
+
+    button {
+      all: unset;
+      transition: all 300ms;
+      padding: 0.5rem 1rem;
+      color: white;
+      border-radius: 1rem;
+      background-color: var(--dc-color-500);
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: var(--dc-color-400);
+    }
+
+    .form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <h1>Kompilator | Discord bot</h1>
+    <h2>Create playlists and make them into Your own video compilations!</h2>
+    <form class="form" method="POST" action="/connect">
+      <label for="password">Password</label>
+      <input type="password" name="password" required="true" />
+      <button type="submit">Connect</button>
+    </form>
+  </main>
+</body>
+
 </html>

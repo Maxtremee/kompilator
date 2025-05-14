@@ -132,3 +132,5 @@ dist
 test-videos/
 *.mp4
 *.mkv
+
+db.sqlite

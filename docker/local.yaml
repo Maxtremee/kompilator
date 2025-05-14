@@ -1,0 +1,21 @@
+name: kompilator
+services:
+  redis:
+    image: redis:7.4.2
+    networks:
+      - internal
+    ports:
+      - 6379:6379
+    restart: always
+    volumes:
+      - redis_data:/var/lib/redis
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+volumes:
+  redis_data:
+networks:
+  internal:
+    driver: bridge
