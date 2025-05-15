@@ -6,6 +6,7 @@ import { ConnectModule } from "./modules/connect/connect.module";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { join } from "node:path";
 import { DiscordModule } from "./modules/discord/discord.module";
+import { RenderModule } from "./modules/render/render.module";
 
 @Module({
 	imports: [
@@ -16,6 +17,7 @@ import { DiscordModule } from "./modules/discord/discord.module";
 		}),
 		ConnectModule,
 		DiscordModule,
+		RenderModule,
 	],
 })
 export class AppModule {}

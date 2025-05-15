@@ -134,3 +134,8 @@ test-videos/
 *.mkv
 
 db.sqlite
+
+# video processing 
+data
+# config files, db, etc.
+config
