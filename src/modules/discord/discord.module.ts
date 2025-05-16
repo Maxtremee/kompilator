@@ -2,7 +2,8 @@ import { Module } from "@nestjs/common";
 import { IntentsBitField } from "discord.js";
 import { NecordModule } from "necord";
 import { AppUpdateService } from "./discord.service";
-import { PingCommand } from "./commands/ping/ping.commands";
+import { PlaylistCommands } from "./commands/playlist.commands";
+import { PlaylistModule } from "../playlist/playlist.module";
 
 @Module({
 	imports: [
@@ -11,7 +12,8 @@ import { PingCommand } from "./commands/ping/ping.commands";
 			intents: [IntentsBitField.Flags.Guilds],
 			development: [process.env.DISCORD_DEVELOPMENT_GUILD_ID!],
 		}),
+		PlaylistModule,
 	],
-	providers: [AppUpdateService, PingCommand],
+	providers: [AppUpdateService, PlaylistCommands],
 })
 export class DiscordModule {}

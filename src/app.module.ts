@@ -7,6 +7,11 @@ import { ServeStaticModule } from "@nestjs/serve-static";
 import { join } from "node:path";
 import { DiscordModule } from "./modules/discord/discord.module";
 import { RenderModule } from "./modules/render/render.module";
+import { PlaylistModule } from './modules/playlist/playlist.module';
+import { CompileModule } from './modules/compile/compile.module';
+import { StorageModule } from './modules/storage/storage.module';
+import { DownloadService } from './modules/download/download.service';
+import { DownloadModule } from './modules/download/download.module';
 
 @Module({
 	imports: [
@@ -18,6 +23,11 @@ import { RenderModule } from "./modules/render/render.module";
 		ConnectModule,
 		DiscordModule,
 		RenderModule,
+		PlaylistModule,
+		CompileModule,
+		StorageModule,
+		DownloadModule,
 	],
+	providers: [DownloadService],
 })
 export class AppModule {}

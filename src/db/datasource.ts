@@ -1,13 +1,13 @@
 import { DataSource, type DataSourceOptions } from "typeorm";
-import { FirstEntity } from "./entities/first.entity";
+import { Playlist } from "./entities/playlist.entity";
+import { PlaylistItem } from "./entities/playlist-item.entity";
 
 export const dataSourceOptions: DataSourceOptions = {
 	type: "sqlite",
 	database: "config/db.sqlite",
-	migrations: ["./migrations/*.ts"],
-	migrationsTableName: "migrations",
+	migrations: ["./dist/src/db/migrations/*.js"],
 	synchronize: process.env.DB_SYNC === "true",
-	entities: [FirstEntity],
+	entities: [PlaylistItem, Playlist],
 };
 
 export const dataSource = new DataSource(dataSourceOptions);
