@@ -1,6 +1,7 @@
 import { StringOption } from "necord";
 
 export const PLAYLIST_NAME_FIELD = "name" as const;
+export const PLAYLIST_NAME_STARTED_FIELD = "playlist" as const;
 
 export class PlaylistNameDto {
 	@StringOption({
@@ -25,7 +26,7 @@ export class PlaylistNameAutocompleteDto {
 
 export class PlaylistItemDto {
 	@StringOption({
-		name: PLAYLIST_NAME_FIELD,
+		name: PLAYLIST_NAME_STARTED_FIELD,
 		description: "Playlist name",
 		required: true,
 		autocomplete: true,

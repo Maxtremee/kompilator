@@ -1,6 +1,9 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import axios, { AxiosInstance } from "axios";
+import { backOff } from "exponential-backoff";
+
+const ATTEMPTS = 5;
 
 type CobaltPicker = {
 	type: "photo" | "video" | "gif";
@@ -37,6 +40,21 @@ export class DownloadService {
 	public async download(url: string): Promise<Buffer> {
 		this.logger.debug(`Downloading ${url}`);
 
+		try {
+			return await backOff(() => this.downloadFile(url), {
+				numOfAttempts: ATTEMPTS,
+				retry: (_, attemptNumber) => {
+					this.logger.debug(`Attempt ${attemptNumber} to download ${url}`);
+					return true;
+				},
+			});
+		} catch (error) {
+			this.logger.error(`Error downloading ${url}: attempts exceeded`);
+			throw error;
+		}
+	}
+
+	private async downloadFile(url: string): Promise<Buffer> {
 		try {
 			const res = await axios.post<CobaltResponse>(
 				this.url,

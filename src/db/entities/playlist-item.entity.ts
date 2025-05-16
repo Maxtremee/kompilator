@@ -7,9 +7,6 @@ import {
 } from "typeorm";
 import { Playlist } from "./playlist.entity";
 
-export const PlaylistStatus = ["started", "finished", "rendering"] as const;
-export type PlaylistStatus = (typeof PlaylistStatus)[number];
-
 @Entity()
 export class PlaylistItem {
 	@PrimaryGeneratedColumn("uuid")
@@ -21,6 +18,9 @@ export class PlaylistItem {
 	@ManyToOne(
 		() => Playlist,
 		(playlist) => playlist.id,
+		{
+			nullable: true,
+		},
 	)
-	playlist: Playlist;
+	playlist?: Playlist;
 }

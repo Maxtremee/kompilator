@@ -1,24 +1,36 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { PlaylistItem } from "~/db/entities/playlist-item.entity";
 import { Playlist } from "~/db/entities/playlist.entity";
+import { PlaylistItemService } from "../playlist-item/playlist-item.service";
+import { StorageService } from "../storage/storage.service";
+import { InjectQueue } from "@nestjs/bullmq";
+import { QUEUES } from "~/common/queue";
+import { Queue } from "bullmq";
+import { RenderEvent, TOPIC_RENDER } from "~/common/events/render.event";
+import { PlaylistStorageService } from "./playlist-storage.service";
+
+export const PLAYLIST_NOT_READY = "playlist-not-ready";
 
 @Injectable()
 export class PlaylistService {
 	private readonly logger = new Logger(PlaylistService.name);
 
 	constructor(
-		@InjectRepository(PlaylistItem)
-		private readonly playlistItemsRepository: Repository<PlaylistItem>,
 		@InjectRepository(Playlist)
 		private readonly playlistRepository: Repository<Playlist>,
+		@Inject(PlaylistItemService)
+		private readonly playlistItemService: PlaylistItemService,
+		@Inject(PlaylistStorageService)
+		private readonly playlistStorageService: PlaylistStorageService,
+		@InjectQueue(QUEUES.RENDER)
+		private readonly renderQueue: Queue,
 	) {}
 
-	async createPlaylist(name: string, guildId: string) {
+	async create(name: string, guildId: string) {
 		const playlist = this.playlistRepository.create({
-			name: name,
 			guildId,
+			name,
 		});
 
 		await this.playlistRepository.save(playlist);
@@ -30,28 +42,21 @@ export class PlaylistService {
 
 	async addToPlaylist(name: string, guildId: string, url: string) {
 		const playlist = await this.playlistRepository.findOne({
-			where: { name: name, guildId },
+			where: { name, guildId },
 		});
 
 		if (!playlist) {
 			throw new Error(`Playlist "${name}" not found`);
 		}
 
-		const playlistItem = this.playlistItemsRepository.create({
-			playlist,
-			url,
-		});
+		if (playlist.status !== "started") {
+			throw new Error(`Playlist "${name}" is closed for editing`);
+		}
 
-		await this.playlistItemsRepository.save(playlistItem);
-
-		this.logger.log(
-			`Added URL "${url}" to playlist "${name}" for guild "${guildId}"`,
-		);
-
-		return playlistItem;
+		return await this.playlistItemService.create(playlist, url);
 	}
 
-	async getPlaylist(name: string, guildId: string) {
+	async getByName(name: string, guildId: string) {
 		const playlist = await this.playlistRepository.findOne({
 			where: { name, guildId },
 			relations: {
@@ -68,23 +73,23 @@ export class PlaylistService {
 		return playlist;
 	}
 
-	async deletePlaylist(name: string, guildId: string) {
-		const playlist = await this.playlistRepository.findOne({
-			where: { name: name, guildId },
-		});
+	// async deleteByName(name: string, guildId: string) {
+	// 	const playlist = await this.playlistRepository.findOne({
+	// 		where: { name, guildId },
+	// 	});
 
-		if (!playlist) {
-			throw new Error(`Playlist "${name}" not found`);
-		}
+	// 	if (!playlist) {
+	// 		throw new Error(`Playlist "${name}" not found`);
+	// 	}
 
-		await this.playlistRepository.remove(playlist);
+	// 	await this.playlistRepository.remove(playlist);
 
-		this.logger.log(`Deleted playlist "${name}" for guild "${guildId}"`);
-	}
+	// 	this.logger.log(`Deleted playlist "${name}" for guild "${guildId}"`);
+	// }
 
-	async getPlaylists(guildId: string) {
+	async getForGuild(guildId: string, started = false) {
 		const playlists = await this.playlistRepository.find({
-			where: { guildId },
+			where: { guildId, status: started ? "started" : undefined },
 		});
 
 		this.logger.debug(`Retrieved playlists for guild "${guildId}"`);
@@ -92,13 +97,30 @@ export class PlaylistService {
 		return playlists;
 	}
 
-	async getStartedPlaylists(guildId: string) {
-		const playlists = await this.playlistRepository.find({
-			where: { guildId, status: "started" },
+	// async getStartedPlaylistsForGuild(guildId: string) {
+	// 	const playlists = await this.playlistRepository.find({
+	// 		where: { guildId, status: "started" },
+	// 	});
+
+	// 	this.logger.debug(`Retrieved started playlists for guild "${guildId}"`);
+
+	// 	return playlists;
+	// }
+
+	async getDownloadLink(playlistId: string) {
+		const playlist = await this.playlistRepository.findOne({
+			where: { id: playlistId },
 		});
 
-		this.logger.debug(`Retrieved started playlists for guild "${guildId}"`);
+		if (playlist!.status === "started") {
+			await this.renderQueue.add(TOPIC_RENDER, new RenderEvent(playlist!.id));
+			throw new Error(PLAYLIST_NOT_READY);
+		}
 
-		return playlists;
+		if (playlist!.status === "rendering") {
+			throw new Error(PLAYLIST_NOT_READY);
+		}
+
+		return await this.playlistStorageService.getPresignedUrl(playlist!.id);
 	}
 }

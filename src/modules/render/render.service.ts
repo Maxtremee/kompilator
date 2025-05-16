@@ -1,11 +1,11 @@
-import { readdir, open } from "node:fs/promises";
+import { readdir, open, readFile, rm } from "node:fs/promises";
 import { Injectable, Logger } from "@nestjs/common";
 import { join } from "node:path";
 import * as ffmpeg from "fluent-ffmpeg";
 import { existsSync, mkdirSync } from "node:fs";
 
 // MISC
-const VIDEOS_DIRECTORY = "data/videos" as const;
+export const VIDEOS_DIRECTORY = "data/videos" as const;
 const MERGED_DIRECTORY = "data/merged" as const;
 const OUTPUT_DIRECTORY = "data/output" as const;
 // 25MiB to kBit
@@ -14,7 +14,7 @@ const PRESET = "medium" as const;
 
 // VIDEO
 const VIDEO_CODEC = "libx265" as const;
-const OUTPUT_FILE_FORMAT = "mp4" as const;
+export const OUTPUT_FILE_FORMAT = "mp4" as const;
 const INTERMEDIATE_FILE_FORMAT = "mkv" as const;
 
 // AUDIO
@@ -43,12 +43,20 @@ export class RenderService {
 	 * @param playlist ID of the playlist to render; videos have to downloaded at this point
 	 * @returns path to the rendered video
 	 */
-	async render(playlist: string): Promise<string> {
+	async render(playlist: string): Promise<Buffer> {
+		this.logger.log(`Rendering playlist ${playlist}`);
+
 		const merged = await this.merge(playlist);
 
 		const compressed = await this.compress(merged, playlist);
 
-		return compressed;
+		const buffer = await readFile(compressed);
+
+		this.logger.log(`Rendering finished for ${playlist}`);
+
+		// this.cleanup();
+
+		return buffer;
 	}
 
 	private async merge(playlist: string): Promise<string> {
@@ -57,16 +65,16 @@ export class RenderService {
 		const outputFilename = `${playlist}.${INTERMEDIATE_FILE_FORMAT}`;
 		const output = join(MERGED_DIRECTORY, outputFilename);
 
-		try {
-			const file = await open(output, "r");
-			if (file) {
-				this.logger.warn(`File ${playlist} already exists, skipping merging`);
-				await file.close();
-				return output;
-			}
-		} catch {
-			// continue
-		}
+		// try {
+		// 	const file = await open(output, "r");
+		// 	if (file) {
+		// 		this.logger.warn(`File ${playlist} already exists, skipping merging`);
+		// 		await file.close();
+		// 		return output;
+		// 	}
+		// } catch {
+		// 	// continue
+		// }
 
 		const videos = await this.getFilenames(playlist);
 		const { width, height } = await this.getDimensions(playlist);
@@ -108,6 +116,8 @@ export class RenderService {
 				})
 				.output(output);
 
+			this.logger.debug(`Merging command: ${cmd._getArguments()}`);
+
 			cmd.run();
 		});
 
@@ -122,18 +132,18 @@ export class RenderService {
 		const outputFilename = `${playlist}.${OUTPUT_FILE_FORMAT}`;
 		const output = join(OUTPUT_DIRECTORY, outputFilename);
 
-		try {
-			const file = await open(output, "r");
-			if (file) {
-				this.logger.warn(
-					`File ${playlist} already exists, skipping compression`,
-				);
-				await file.close();
-				return output;
-			}
-		} catch {
-			// continue
-		}
+		// try {
+		// 	const file = await open(output, "r");
+		// 	if (file) {
+		// 		this.logger.warn(
+		// 			`File ${playlist} already exists, skipping compression`,
+		// 		);
+		// 		await file.close();
+		// 		return output;
+		// 	}
+		// } catch {
+		// 	// continue
+		// }
 
 		const bitrate = await this.getBitrate(playlist);
 
@@ -248,5 +258,20 @@ export class RenderService {
 		);
 
 		return { width, height };
+	}
+
+	private async cleanup() {
+		this.logger.log("Cleaning up");
+
+		await rm(MERGED_DIRECTORY, {
+			recursive: true,
+		});
+		this.logger.debug("All files removed from merged directory");
+		await rm(OUTPUT_DIRECTORY, {
+			recursive: true,
+		});
+		this.logger.debug("All files removed from output directory");
+
+		this.logger.log("Cleanup finished");
 	}
 }

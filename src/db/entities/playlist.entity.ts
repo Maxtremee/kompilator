@@ -1,10 +1,6 @@
-import {
-	Column,
-	Entity,
-	OneToMany,
-	PrimaryGeneratedColumn,
-} from "typeorm";
-import { PlaylistItem, PlaylistStatus } from "./playlist-item.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { PlaylistItem } from "./playlist-item.entity";
+import { PlaylistStatus } from "./playlist-status.enum";
 
 @Entity()
 export class Playlist {
@@ -19,7 +15,7 @@ export class Playlist {
 
 	@Column({
 		type: "varchar",
-		default: "started",
+		default: PlaylistStatus[0],
 		enum: PlaylistStatus,
 	})
 	status: PlaylistStatus;
