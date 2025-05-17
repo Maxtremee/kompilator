@@ -1,6 +1,6 @@
 import { DataSource, type DataSourceOptions } from "typeorm";
-import { Playlist } from "./entities/playlist.entity";
 import { PlaylistItem } from "./entities/playlist-item.entity";
+import { Playlist } from "./entities/playlist.entity";
 
 export const dataSourceOptions: DataSourceOptions = {
 	type: "sqlite",

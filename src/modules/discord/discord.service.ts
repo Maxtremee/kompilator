@@ -1,5 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { Context, On, Once, ContextOf } from "necord";
+import { Context, ContextOf, On, Once } from "necord";
 
 @Injectable()
 export class AppUpdateService {

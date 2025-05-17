@@ -1,13 +1,13 @@
+import { InjectQueue } from "@nestjs/bullmq";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { Queue } from "bullmq";
 import { Repository } from "typeorm";
+import { RenderEvent, TOPIC_RENDER } from "~/common/events/render.event";
+import { QUEUES } from "~/common/queue";
 import { Playlist } from "~/db/entities/playlist.entity";
 import { PlaylistItemService } from "../playlist-item/playlist-item.service";
 import { StorageService } from "../storage/storage.service";
-import { InjectQueue } from "@nestjs/bullmq";
-import { QUEUES } from "~/common/queue";
-import { Queue } from "bullmq";
-import { RenderEvent, TOPIC_RENDER } from "~/common/events/render.event";
 import { PlaylistStorageService } from "./playlist-storage.service";
 
 export const PLAYLIST_NOT_READY = "playlist-not-ready";
@@ -54,6 +54,20 @@ export class PlaylistService {
 		}
 
 		return await this.playlistItemService.create(playlist, url);
+	}
+
+	async getById(id: string) {
+		const playlist = await this.playlistRepository.findOne({
+			where: { id },
+			relations: {
+				items: true,
+			},
+		});
+		if (!playlist) {
+			throw new Error(`Playlist with ID "${id}" not found`);
+		}
+		this.logger.debug(`Retrieved playlist with ID "${id}"`);
+		return playlist;
 	}
 
 	async getByName(name: string, guildId: string) {
@@ -114,6 +128,9 @@ export class PlaylistService {
 
 		if (playlist!.status === "started") {
 			await this.renderQueue.add(TOPIC_RENDER, new RenderEvent(playlist!.id));
+			await this.playlistRepository.update(playlist!.id, {
+				status: "rendering",
+			});
 			throw new Error(PLAYLIST_NOT_READY);
 		}
 

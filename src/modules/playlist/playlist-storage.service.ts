@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import { BUCKETS, StorageService } from "../storage/storage.service";
 import { OUTPUT_FILE_FORMAT } from "../render/render.service";
+import { BUCKETS, StorageService } from "../storage/storage.service";
 
 @Injectable()
 export class PlaylistStorageService {
@@ -27,7 +27,7 @@ export class PlaylistStorageService {
 		await this.storageService.getBucket(BUCKETS.PLAYLISTS);
 		const url = await this.storageService.client.presignedGetObject(
 			BUCKETS.PLAYLISTS,
-			name,
+			`${name}.${OUTPUT_FILE_FORMAT}`,
 			60 * 60 * 24, // 1 day
 		);
 		this.logger.log(`Presigned URL for playlist "${name}" generated`);

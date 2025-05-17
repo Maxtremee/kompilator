@@ -1,25 +1,25 @@
-import { Inject, Logger, UseInterceptors } from "@nestjs/common";
 import { bold } from "@discordjs/formatters";
+import { Inject, Logger, UseInterceptors } from "@nestjs/common";
+import { hyperlink, unorderedList } from "discord.js";
 import {
 	Context,
-	createCommandGroupDecorator,
 	Options,
 	SlashCommandContext,
 	StringOption,
 	Subcommand,
+	createCommandGroupDecorator,
 } from "necord";
+import { z } from "zod";
 import {
 	PLAYLIST_NOT_READY,
 	PlaylistService,
 } from "~/modules/playlist/playlist.service";
-import { PlaylistInterceptor } from "./playlist.interceptor";
-import { z } from "zod";
-import { unorderedList, hyperlink } from "discord.js";
 import {
 	PlaylistItemDto,
 	PlaylistNameAutocompleteDto,
 	PlaylistNameDto,
 } from "./playlist.dto";
+import { PlaylistInterceptor } from "./playlist.interceptor";
 
 export const PlaylistCommandDecorator = createCommandGroupDecorator({
 	name: "playlist",
@@ -171,9 +171,7 @@ export class PlaylistCommands {
 				});
 			}
 
-			await interaction.reply({
-				content: `🎵 Checking if ${bold(name)} is ready...`,
-			});
+			await interaction.deferReply();
 
 			let isFinished = false;
 			do {
@@ -189,8 +187,8 @@ export class PlaylistCommands {
 							content: `🎵 Playlist ${bold(name)} is rendering. Last update: ${new Date().toISOString()}`,
 						});
 					}
-					// sleep for 10 seconds before checking again
-					await new Promise((resolve) => setTimeout(resolve, 10000));
+					// sleep for 5 seconds before checking again
+					await new Promise((resolve) => setTimeout(resolve, 5000));
 				}
 			} while (!isFinished);
 		} catch (error) {

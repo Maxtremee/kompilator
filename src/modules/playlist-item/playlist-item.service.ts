@@ -4,8 +4,8 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { PlaylistItem } from "~/db/entities/playlist-item.entity";
 import { Playlist } from "~/db/entities/playlist.entity";
-import { PlaylistItemStorageService } from "./playlist-item-storage.service";
 import { DownloadService } from "../download/download.service";
+import { PlaylistItemStorageService } from "./playlist-item-storage.service";
 
 @Injectable()
 export class PlaylistItemService {
@@ -21,7 +21,6 @@ export class PlaylistItemService {
 	) {}
 
 	/**
-	 *
 	 * synchronously creates a playlist item, downloads the file, saves it to storage, and saves the item to the database
 	 * @param playlist
 	 * @param url
@@ -60,34 +59,6 @@ export class PlaylistItemService {
 		}
 		return playlistItem;
 	}
-
-	// async delete(playlistId: string, guildId: string, url: string) {
-	// 	const playlist = await this.playlistRepository.findOne({
-	// 		where: { id: playlistId, guildId },
-	// 	});
-
-	// 	if (!playlist) {
-	// 		throw new Error(`Playlist "${playlistId}" not found`);
-	// 	}
-
-	// 	const playlistItem = await this.playlistItemsRepository.findOne({
-	// 		where: { playlist, url },
-	// 	});
-
-	// 	if (!playlistItem) {
-	// 		throw new Error(`Playlist item "${url}" not found`);
-	// 	}
-
-	// 	// schedule item to delete and remove it from the playlist
-	// 	playlistItem.playlist = undefined;
-	// 	await this.playlistItemsRepository.save(playlistItem);
-
-	// 	this.logger.log(
-	// 		`Removed URL "${url}" from playlist "${playlistId}" for guild "${guildId}"`,
-	// 	);
-
-	// 	return playlistItem;
-	// }
 
 	// cleanup all playlist items that are in a finished playlist
 	@Cron(CronExpression.EVERY_12_HOURS)

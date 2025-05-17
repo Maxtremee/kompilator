@@ -1,8 +1,7 @@
-import { readdir, open, readFile, rm } from "node:fs/promises";
-import { Injectable, Logger } from "@nestjs/common";
+import { mkdir, open, readFile, readdir, rm } from "node:fs/promises";
 import { join } from "node:path";
+import { Injectable, Logger } from "@nestjs/common";
 import * as ffmpeg from "fluent-ffmpeg";
-import { existsSync, mkdirSync } from "node:fs";
 
 // MISC
 export const VIDEOS_DIRECTORY = "data/videos" as const;
@@ -25,19 +24,6 @@ const AUDIO_BITRATE = 128 as const;
 export class RenderService {
 	private readonly logger = new Logger(RenderService.name);
 
-	constructor() {
-		const videosDir = join(VIDEOS_DIRECTORY);
-		const mergedDir = join(MERGED_DIRECTORY);
-		const outputDir = join(OUTPUT_DIRECTORY);
-		// Create directories if they don't exist
-		for (const dir of [videosDir, mergedDir, outputDir]) {
-			if (!existsSync(dir)) {
-				mkdirSync(dir, { recursive: true });
-				this.logger.log(`Created directory: ${dir}`);
-			}
-		}
-	}
-
 	/**
 	 *
 	 * @param playlist ID of the playlist to render; videos have to downloaded at this point
@@ -54,9 +40,54 @@ export class RenderService {
 
 		this.logger.log(`Rendering finished for ${playlist}`);
 
-		// this.cleanup();
-
 		return buffer;
+	}
+
+	async prepare() {
+		this.logger.debug("Preparing for render");
+
+		const videosDir = join(VIDEOS_DIRECTORY);
+		const mergedDir = join(MERGED_DIRECTORY);
+		const outputDir = join(OUTPUT_DIRECTORY);
+
+		const dirs = [videosDir, mergedDir, outputDir];
+
+		// remove directories
+		for (const dir of dirs) {
+			await rm(dir, {
+				recursive: true,
+				force: true,
+			});
+			this.logger.debug(`Removed directory: ${dir}`);
+		}
+
+		// Create directories
+		for (const dir of dirs) {
+			await mkdir(dir, { recursive: true });
+			this.logger.debug(`Created directory: ${dir}`);
+		}
+
+		this.logger.debug("Preparing for render finished");
+	}
+
+	async cleanup() {
+		this.logger.debug("Cleanup after render");
+
+		const videosDir = join(VIDEOS_DIRECTORY);
+		const mergedDir = join(MERGED_DIRECTORY);
+		const outputDir = join(OUTPUT_DIRECTORY);
+
+		const dirs = [videosDir, mergedDir, outputDir];
+
+		for (const dir of dirs) {
+			await rm(dir, {
+				recursive: true,
+				force: true,
+			});
+			this.logger.debug(`Removed directory: ${dir}`);
+		}
+
+		this.logger.debug("Cleanup after render finished");
 	}
 
 	private async merge(playlist: string): Promise<string> {
@@ -65,16 +96,16 @@ export class RenderService {
 		const outputFilename = `${playlist}.${INTERMEDIATE_FILE_FORMAT}`;
 		const output = join(MERGED_DIRECTORY, outputFilename);
 
-		// try {
-		// 	const file = await open(output, "r");
-		// 	if (file) {
-		// 		this.logger.warn(`File ${playlist} already exists, skipping merging`);
-		// 		await file.close();
-		// 		return output;
-		// 	}
-		// } catch {
-		// 	// continue
-		// }
+		try {
+			const file = await open(output, "r");
+			if (file) {
+				this.logger.warn(`File ${playlist} already exists, skipping merging`);
+				await file.close();
+				return output;
+			}
+		} catch {
+			// continue
+		}
 
 		const videos = await this.getFilenames(playlist);
 		const { width, height } = await this.getDimensions(playlist);
@@ -132,18 +163,18 @@ export class RenderService {
 		const outputFilename = `${playlist}.${OUTPUT_FILE_FORMAT}`;
 		const output = join(OUTPUT_DIRECTORY, outputFilename);
 
-		// try {
-		// 	const file = await open(output, "r");
-		// 	if (file) {
-		// 		this.logger.warn(
-		// 			`File ${playlist} already exists, skipping compression`,
-		// 		);
-		// 		await file.close();
-		// 		return output;
-		// 	}
-		// } catch {
-		// 	// continue
-		// }
+		try {
+			const file = await open(output, "r");
+			if (file) {
+				this.logger.warn(
+					`File ${playlist} already exists, skipping compression`,
+				);
+				await file.close();
+				return output;
+			}
+		} catch {
+			// continue
+		}
 
 		const bitrate = await this.getBitrate(playlist);
 
@@ -258,20 +289,5 @@ export class RenderService {
 		);
 
 		return { width, height };
-	}
-
-	private async cleanup() {
-		this.logger.log("Cleaning up");
-
-		await rm(MERGED_DIRECTORY, {
-			recursive: true,
-		});
-		this.logger.debug("All files removed from merged directory");
-		await rm(OUTPUT_DIRECTORY, {
-			recursive: true,
-		});
-		this.logger.debug("All files removed from output directory");
-
-		this.logger.log("Cleanup finished");
 	}
 }

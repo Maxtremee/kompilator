@@ -1,7 +1,7 @@
+import type { LogLevel } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
-import { ConfigService } from "@nestjs/config";
-import type { LogLevel } from "@nestjs/common";
 
 Object.freeze(globalThis);
 

@@ -1,9 +1,9 @@
 import { Module } from "@nestjs/common";
 import { IntentsBitField } from "discord.js";
 import { NecordModule } from "necord";
-import { AppUpdateService } from "./discord.service";
-import { PlaylistCommands } from "./commands/playlist.commands";
 import { PlaylistModule } from "../playlist/playlist.module";
+import { PlaylistCommands } from "./commands/playlist.commands";
+import { AppUpdateService } from "./discord.service";
 
 @Module({
 	imports: [

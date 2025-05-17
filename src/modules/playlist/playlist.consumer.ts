@@ -1,17 +1,18 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { OnWorkerEvent, Processor, WorkerHost } from "@nestjs/bullmq";
 import { Inject, Logger } from "@nestjs/common";
-import { Job } from "bullmq";
-import { QUEUES } from "~/common/queue";
-import { RenderEvent, TOPIC_RENDER } from "~/common/events/render.event";
-import { PlaylistStorageService } from "./playlist-storage.service";
-import { RenderService, VIDEOS_DIRECTORY } from "../render/render.service";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Playlist } from "~/db/entities/playlist.entity";
+import { Job } from "bullmq";
 import { Repository } from "typeorm";
-import { PlaylistItemStorageService } from "../playlist-item/playlist-item-storage.service";
-import { mkdir, rm, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { RenderEvent, TOPIC_RENDER } from "~/common/events/render.event";
+import { QUEUES } from "~/common/queue";
 import { PlaylistStatus } from "~/db/entities/playlist-status.enum";
+import { Playlist } from "~/db/entities/playlist.entity";
+import { PlaylistItemStorageService } from "../playlist-item/playlist-item-storage.service";
+import { RenderService, VIDEOS_DIRECTORY } from "../render/render.service";
+import { PlaylistStorageService } from "./playlist-storage.service";
+import { PlaylistService } from "./playlist.service";
 
 export type PlaylistJob = Job<RenderEvent, void, typeof TOPIC_RENDER>;
 
@@ -22,6 +23,8 @@ export class PlaylistConsumer extends WorkerHost {
 	constructor(
 		@InjectRepository(Playlist)
 		private readonly playlistRepository: Repository<Playlist>,
+		@Inject(PlaylistService)
+		private readonly playlistService: PlaylistService,
 		@Inject(PlaylistItemStorageService)
 		private readonly playlistItemStorageService: PlaylistItemStorageService,
 		@Inject(PlaylistStorageService)
@@ -39,39 +42,24 @@ export class PlaylistConsumer extends WorkerHost {
 
 	@OnWorkerEvent("completed")
 	async onCompleted(job: PlaylistJob): Promise<void> {
-		// await this.cleanup();
 		this.logger.log(`Rendering playlist ${job.data.playlistId} completed`);
 	}
 
 	@OnWorkerEvent("failed")
 	async onFailed(job: PlaylistJob): Promise<void> {
-		// await this.cleanup();
 		this.logger.error(`Rendering playlist ${job.data.playlistId} failed`);
 	}
 
 	async process(job: PlaylistJob): Promise<void> {
 		try {
 			const { playlistId } = job.data;
+			const playlist = await this.playlistService.getById(playlistId);
 
-			const playlist = await this.playlistRepository.findOne({
-				where: { id: playlistId },
-				relations: {
-					items: true,
-				},
-			});
-
-			if (!playlist) {
-				throw new Error(`Playlist "${playlistId}" not found`);
-			}
-
-			const itemsDir = join(VIDEOS_DIRECTORY, playlist.id);
-
-			// create directory for playlist
-			await mkdir(itemsDir, {
-				recursive: true,
-			});
+			await this.renderService.prepare();
 
 			// write all clips to file system
+			const itemsDir = join(VIDEOS_DIRECTORY, playlist.id);
+			await mkdir(itemsDir, { recursive: true });
 			for (const item of playlist.items) {
 				const buffer = await this.playlistItemStorageService.get(item.id);
 				await writeFile(join(itemsDir, item.id), buffer, {
@@ -92,22 +80,12 @@ export class PlaylistConsumer extends WorkerHost {
 			// update the playlist in the database
 			await this.playlistRepository.save(playlist);
 
-			// delete all items from storage
-			for (const item of playlist.items) {
-				await this.playlistItemStorageService.delete(item.id);
-			}
+			return;
 		} catch (error) {
 			this.logger.error(`Error processing playlist: ${error.message}`);
 			throw error;
+		} finally {
+			await this.renderService.cleanup();
 		}
-	}
-
-	private async cleanup() {
-		this.logger.log("Cleaning up");
-
-		await rm(VIDEOS_DIRECTORY, {
-			recursive: true,
-		});
-		this.logger.debug("All files removed from videos directory");
 	}
 }

@@ -7,8 +7,8 @@ import {
 	Post,
 	Res,
 } from "@nestjs/common";
-import type { Response } from "express";
 import { ConfigService } from "@nestjs/config";
+import type { Response } from "express";
 
 @Controller("/")
 export class ConnectController {

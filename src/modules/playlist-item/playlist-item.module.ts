@@ -1,12 +1,12 @@
 import { Module } from "@nestjs/common";
-import { PlaylistItemService } from "./playlist-item.service";
-import { StorageModule } from "../storage/storage.module";
-import { StorageService } from "../storage/storage.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { PlaylistItem } from "~/db/entities/playlist-item.entity";
 import { DownloadModule } from "../download/download.module";
 import { DownloadService } from "../download/download.service";
+import { StorageModule } from "../storage/storage.module";
+import { StorageService } from "../storage/storage.service";
 import { PlaylistItemStorageService } from "./playlist-item-storage.service";
+import { PlaylistItemService } from "./playlist-item.service";
 
 @Module({
 	imports: [
