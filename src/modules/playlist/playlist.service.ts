@@ -27,7 +27,15 @@ export class PlaylistService {
 		private readonly renderQueue: Queue,
 	) {}
 
-	async create(name: string, guildId: string) {
+	async createForGuild(name: string, guildId: string) {
+		const existingPlaylist = await this.playlistRepository.findOne({
+			where: { name, guildId },
+		});
+
+		if (existingPlaylist) {
+			throw new Error(`Playlist "${name}" already exists`);
+		}
+
 		const playlist = this.playlistRepository.create({
 			guildId,
 			name,

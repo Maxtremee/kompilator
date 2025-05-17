@@ -43,14 +43,14 @@ export class PlaylistCommands {
 		@Options() { name }: PlaylistNameDto,
 	) {
 		try {
-			await this.playlistService.create(name, interaction.guildId!);
+			await this.playlistService.createForGuild(name, interaction.guildId!);
 			return interaction.reply({
 				content: `✅ Playlist ${bold(name)} created!`,
 			});
 		} catch (error) {
 			this.logger.error(`❌ Error creating playlist: ${error.message}`);
 			return interaction.reply({
-				content: `❌ Error creating playlist ${bold(name)}`,
+				content: `❌ Error creating playlist ${bold(name)}: ${error.message}`,
 			});
 		}
 	}
@@ -80,7 +80,7 @@ export class PlaylistCommands {
 		} catch (error) {
 			this.logger.error(`❌ Error adding to playlist: ${error.message}`);
 			return interaction.editReply({
-				content: `❌ Error adding "${url}" to playlist ${bold(name)}`,
+				content: `❌ Error adding "${url}" to playlist ${bold(name)}: ${error.message}`,
 			});
 		}
 	}
@@ -115,7 +115,7 @@ export class PlaylistCommands {
 		} catch (error) {
 			this.logger.error(`❌ Error retrieving playlist: ${error.message}`);
 			return interaction.reply({
-				content: `❌ Error retrieving playlist ${bold(name)}`,
+				content: `❌ Error retrieving playlist ${bold(name)}: ${error.message}`,
 			});
 		}
 	}
@@ -145,7 +145,7 @@ export class PlaylistCommands {
 		} catch (error) {
 			this.logger.error(`❌ Error listing playlists: ${error.message}`);
 			return interaction.reply({
-				content: "❌ Error listing playlists",
+				content: `❌ Error listing playlists: ${error.message}`,
 			});
 		}
 	}
@@ -194,7 +194,7 @@ export class PlaylistCommands {
 		} catch (error) {
 			this.logger.error(`❌ Error downloading playlist: ${error.message}`);
 			return interaction.reply({
-				content: `❌ Error downloading playlist ${bold(name)}`,
+				content: `❌ Error downloading playlist ${bold(name)}: ${error.message}`,
 			});
 		}
 	}
