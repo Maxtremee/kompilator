@@ -16,6 +16,7 @@ import { PlaylistItemModule } from "./modules/playlist-item/playlist-item.module
 import { PlaylistModule } from "./modules/playlist/playlist.module";
 import { RenderModule } from "./modules/render/render.module";
 import { StorageModule } from "./modules/storage/storage.module";
+import { ScheduleModule } from "@nestjs/schedule";
 
 @Module({
 	imports: [
@@ -23,6 +24,7 @@ import { StorageModule } from "./modules/storage/storage.module";
 		TypeOrmModule.forRoot(dataSourceOptions),
 		BullModule.forRoot(queueOptions),
 		BullBoardModule.forRoot(bullBoardOptions),
+		ScheduleModule.forRoot(),
 		ServeStaticModule.forRoot({
 			rootPath: join(__dirname, "..", "public"),
 		}),

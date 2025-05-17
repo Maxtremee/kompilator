@@ -28,7 +28,7 @@ services:
     networks:
       - internal
     ports:
-      - 6400:6400
+      - 6400:6379
     restart: always
     volumes:
       - redis_data:/var/lib/redis
