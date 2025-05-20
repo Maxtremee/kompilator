@@ -20,12 +20,15 @@ RUN npm install -g corepack@latest
 RUN corepack enable
 RUN pnpm i --prod --ignore-scripts
 
-EXPOSE 3000
 ENV NODE_ENV=production
 ENV NODE_OPTIONS=--disable-proto=delete
 
 RUN apt-get update
 RUN apt-get install dumb-init ffmpeg -y --no-install-recommends
+
+EXPOSE 3000
+VOLUME /config
+VOLUME /data
 
 USER node
 CMD ["dumb-init", "node", "dist/main"]
