@@ -3,6 +3,7 @@ import { DataSource, type DataSourceOptions } from "typeorm";
 import { PlaylistItem } from "./entities/playlist-item.entity";
 import { Playlist } from "./entities/playlist.entity";
 import { ConfigService } from "@nestjs/config";
+import * as sqlite from "sqlite3";
 
 const configService = new ConfigService();
 
