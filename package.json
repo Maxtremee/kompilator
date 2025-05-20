@@ -1,5 +1,6 @@
 {
 	"name": "kompilator",
+	"version": "0.1.0",
 	"scripts": {
 		"build": "nest build",
 		"check:fix": "biome check --write",
