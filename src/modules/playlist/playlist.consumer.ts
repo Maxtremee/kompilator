@@ -62,7 +62,6 @@ export class PlaylistConsumer extends WorkerHost {
 			await mkdir(itemsDir, { recursive: true });
 			for (const item of playlist.items) {
 				const buffer = await this.playlistItemStorageService.get(item.id);
-				console.log(item.createdAt);
 				const name = item.createdAt.toISOString();
 				// use date as filename so files are sorted by creation date
 				await writeFile(join(itemsDir, name), buffer, {
