@@ -7,7 +7,7 @@ COPY . .
 
 RUN npm install -g corepack@latest
 RUN corepack enable
-RUN pnpm i --ignore-scripts --frozen-lockfile
+RUN pnpm i --frozen-lockfile
 RUN pnpm build
 
 FROM base AS runner
@@ -19,7 +19,7 @@ COPY --from=builder /app/pnpm-lock.yaml .
 
 RUN npm install -g corepack@latest
 RUN corepack enable
-RUN pnpm i --prod --ignore-scripts
+RUN pnpm i --prod --frozen-lockfile
 
 ENV NODE_ENV=production
 ENV NODE_OPTIONS=--disable-proto=delete
