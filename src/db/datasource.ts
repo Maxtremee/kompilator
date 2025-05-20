@@ -10,9 +10,10 @@ const configService = new ConfigService();
 export const dataSourceOptions: DataSourceOptions = {
 	type: "sqlite",
 	database: "config/db.sqlite",
-	migrations: ["./dist/src/db/migrations/*.js"],
+	migrations: ["./dist/db/migrations/*.js"],
 	synchronize: configService.get<string>("DB_SYNC") === "true",
 	entities: [PlaylistItem, Playlist],
+	logging: true,
 };
 
 export const dataSource = new DataSource(dataSourceOptions);
