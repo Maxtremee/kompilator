@@ -11,6 +11,7 @@ RUN pnpm i --ignore-scripts --frozen-lockfile
 RUN pnpm build
 
 FROM base AS runner
+WORKDIR /app
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json .
@@ -27,8 +28,8 @@ RUN apt-get update
 RUN apt-get install dumb-init ffmpeg -y --no-install-recommends
 
 EXPOSE 3000
-VOLUME /config
-VOLUME /data
+VOLUME /app/config
+VOLUME /app/data
 
 USER node
 CMD ["dumb-init", "node", "dist/main"]
