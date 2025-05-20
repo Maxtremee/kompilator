@@ -27,9 +27,5 @@ ENV NODE_OPTIONS=--disable-proto=delete
 RUN apt-get update
 RUN apt-get install dumb-init ffmpeg -y --no-install-recommends
 
-EXPOSE 3000
-VOLUME /app/config
-VOLUME /app/data
-
 USER node
 CMD ["dumb-init", "node", "dist/main"]
