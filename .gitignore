@@ -132,3 +132,10 @@ dist
 test-videos/
 *.mp4
 *.mkv
+
+db.sqlite
+
+# video processing 
+data
+# config files, db, etc.
+config
