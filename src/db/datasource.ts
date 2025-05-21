@@ -13,7 +13,7 @@ export const dataSourceOptions: DataSourceOptions = {
 	migrations: ["./dist/db/migrations/*.js"],
 	synchronize: configService.get<string>("DB_SYNC") === "true",
 	entities: [PlaylistItem, Playlist],
-	logging: true,
+	logging: configService.get<string>("DB_LOG") === "true",
 };
 
 export const dataSource = new DataSource(dataSourceOptions);

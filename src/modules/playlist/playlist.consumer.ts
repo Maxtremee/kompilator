@@ -38,16 +38,19 @@ export class PlaylistConsumer extends WorkerHost {
 	@OnWorkerEvent("active")
 	async onActive(job: PlaylistJob): Promise<void> {
 		this.logger.log(`Rendering playlist: ${job.data.playlistId}`);
+		await this.renderService.prepare();
 	}
 
 	@OnWorkerEvent("completed")
 	async onCompleted(job: PlaylistJob): Promise<void> {
 		this.logger.log(`Rendering playlist ${job.data.playlistId} completed`);
+		await this.renderService.cleanup();
 	}
 
 	@OnWorkerEvent("failed")
 	async onFailed(job: PlaylistJob): Promise<void> {
 		this.logger.error(`Rendering playlist ${job.data.playlistId} failed`);
+		await this.renderService.cleanup();
 	}
 
 	async process(job: PlaylistJob): Promise<void> {
@@ -55,11 +58,10 @@ export class PlaylistConsumer extends WorkerHost {
 			const { playlistId } = job.data;
 			const playlist = await this.playlistService.getById(playlistId);
 
-			await this.renderService.prepare();
-
 			// write all clips to file system
 			const itemsDir = join(VIDEOS_DIRECTORY, playlist.id);
 			await mkdir(itemsDir, { recursive: true });
+
 			for (const item of playlist.items) {
 				const buffer = await this.playlistItemStorageService.get(item.id);
 				const name = item.createdAt.toISOString();
@@ -86,8 +88,6 @@ export class PlaylistConsumer extends WorkerHost {
 		} catch (error) {
 			this.logger.error(`Error processing playlist: ${error.message}`);
 			throw error;
-		} finally {
-			await this.renderService.cleanup();
 		}
 	}
 }
